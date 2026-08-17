@@ -8,6 +8,12 @@
     "scheme": "kopiajoesales",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/840ee68a-c786-441c-8b84-c7642ea5344c"
+    },
     "ios": {
       "supportsTablet": true
     },
@@ -19,7 +25,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.meganeeeman.KopiAjoeSales"
     },
     "web": {
       "output": "static",
@@ -43,6 +50,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "840ee68a-c786-441c-8b84-c7642ea5344c"
+      }
+    },
+    "owner": "meganeeeman"
   }
 }

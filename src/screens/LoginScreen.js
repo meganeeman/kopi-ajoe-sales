@@ -12,8 +12,10 @@ import {
 } from 'react-native';
 import { supabase } from '../config/supabase';
 import { COLORS } from '../constants/theme';
+import { useOtaUpdate } from '../utils/useOtaUpdate';
 
 export default function LoginScreen({ navigation }) {
+    useOtaUpdate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);

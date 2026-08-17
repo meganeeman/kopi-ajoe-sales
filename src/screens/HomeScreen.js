@@ -18,8 +18,10 @@ import { supabase } from '../config/supabase';
 import { PRODUCT_IMAGES } from '../constants/images';
 import { COLORS } from '../constants/theme';
 import { salesService } from '../services/salesServices';
+import { useOtaUpdate } from '../utils/useOtaUpdate';
 
 export default function HomeScreen() {
+    useOtaUpdate();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [cart, setCart] = useState({});
