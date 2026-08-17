@@ -1,3 +1,4 @@
+import * as Application from 'expo-application';
 import * as Location from 'expo-location';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -35,12 +36,45 @@ export default function HomeScreen() {
     const currentCartUnitId = useRef(null);
 
     useEffect(() => {
+        checkDeviceSession();
         fetchProducts();
 
         return () => {
             stopLocationTracking();
         };
     }, []);
+
+    const checkDeviceSession = async () => {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            let currentDeviceId = 'unknown_device';
+            if (Platform.OS === 'android') {
+                currentDeviceId = Application.getAndroidId() || 'android_device';
+            } else if (Platform.OS === 'ios') {
+                const iosId = await Application.getIosIdForVendorAsync();
+                currentDeviceId = iosId || 'ios_device';
+            }
+
+            const { data: userData } = await supabase
+                .from('users')
+                .select('current_device_id')
+                .eq('id', user.id)
+                .maybeSingle();
+
+            if (userData && userData.current_device_id && userData.current_device_id !== currentDeviceId) {
+                await stopLocationTracking();
+                await supabase.auth.signOut();
+                Alert.alert(
+                    'Sesi Berakhir',
+                    'Akun kamu telah masuk di perangkat lain. Silakan masuk kembali.'
+                );
+            }
+        } catch (error) {
+            console.log('Error checking device session:', error);
+        }
+    };
 
     const fetchProducts = async () => {
         try {
