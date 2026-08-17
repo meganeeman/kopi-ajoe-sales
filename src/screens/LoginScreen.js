@@ -1,3 +1,4 @@
+import * as Application from 'expo-application';
 import { useState } from 'react';
 import {
     ActivityIndicator,
@@ -35,8 +36,22 @@ export default function LoginScreen({ navigation }) {
 
             if (error) throw error;
 
+            let deviceId = 'unknown_device';
+            if (Platform.OS === 'android') {
+                deviceId = Application.getAndroidId() || 'android_device';
+            } else if (Platform.OS === 'ios') {
+                const iosId = await Application.getIosIdForVendorAsync();
+                deviceId = iosId || 'ios_device';
+            }
+
+            if (data?.user) {
+                await supabase
+                    .from('users')
+                    .update({ current_device_id: deviceId })
+                    .eq('id', data.user.id);
+            }
+
             Alert.alert('Sukses', 'Berhasil masuk!');
-            
         } catch (error) {
             Alert.alert('Login Gagal', error.message || 'Email atau password salah.');
         } finally {

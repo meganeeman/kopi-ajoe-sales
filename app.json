@@ -20,7 +20,8 @@
     "android": {
       "icon": "./assets/icon/icon.png",
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.meganeeeman.KopiAjoeSales"
     },
     "web": {
       "output": "static"

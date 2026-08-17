@@ -6,6 +6,7 @@ import {
     FlatList,
     Image,
     Modal,
+    Platform,
     SafeAreaView,
     StatusBar,
     StyleSheet,
@@ -31,6 +32,7 @@ export default function HomeScreen() {
     const [selectedPayment, setSelectedPayment] = useState('');
 
     const locationSubscription = useRef(null);
+    const currentCartUnitId = useRef(null);
 
     useEffect(() => {
         fetchProducts();
@@ -83,6 +85,66 @@ export default function HomeScreen() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return false;
 
+            let { data: unitData } = await supabase
+                .from('cart_units')
+                .select('id')
+                .eq('active_sales_id', user.id)
+                .maybeSingle();
+
+            if (!unitData) {
+                const { data: availableUnit } = await supabase
+                    .from('cart_units')
+                    .select('id')
+                    .is('active_sales_id', null)
+                    .limit(1)
+                    .maybeSingle();
+
+                if (availableUnit) {
+                    await supabase
+                        .from('cart_units')
+                        .update({ active_sales_id: user.id })
+                        .eq('id', availableUnit.id);
+                    unitData = availableUnit;
+                } else {
+                    const { data: anyUnit } = await supabase
+                        .from('cart_units')
+                        .select('id')
+                        .limit(1)
+                        .maybeSingle();
+
+                    if (anyUnit) {
+                        await supabase
+                            .from('cart_units')
+                            .update({ active_sales_id: user.id })
+                            .eq('id', anyUnit.id);
+                        unitData = anyUnit;
+                    }
+                }
+            }
+
+            if (!unitData) {
+                Alert.alert('Gagal', 'Tidak ada unit gerobak yang tersedia di database.');
+                return false;
+            }
+
+            currentCartUnitId.current = unitData.id;
+
+            const initialLocation = await Location.getCurrentPositionAsync({
+                accuracy: Location.Accuracy.High,
+            });
+
+            if (initialLocation) {
+                await supabase
+                    .from('cart_units')
+                    .update({
+                        latitude: initialLocation.coords.latitude,
+                        longitude: initialLocation.coords.longitude,
+                        is_open: true,
+                        updated_at: new Date().toISOString(),
+                    })
+                    .eq('id', unitData.id);
+            }
+
             locationSubscription.current = await Location.watchPositionAsync(
                 {
                     accuracy: Location.Accuracy.High,
@@ -97,10 +159,10 @@ export default function HomeScreen() {
                         .update({
                             latitude: latitude,
                             longitude: longitude,
-                            is_online: true,
-                            last_ping: new Date().toISOString(),
+                            is_open: true,
+                            updated_at: new Date().toISOString(),
                         })
-                        .eq('active_sales_id', user.id);
+                        .eq('id', unitData.id);
                 }
             );
 
@@ -119,12 +181,21 @@ export default function HomeScreen() {
             }
 
             const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
+
+            if (currentCartUnitId.current) {
                 await supabase
                     .from('cart_units')
                     .update({
-                        is_online: false,
-                        last_ping: new Date().toISOString(),
+                        is_open: false,
+                        updated_at: new Date().toISOString(),
+                    })
+                    .eq('id', currentCartUnitId.current);
+            } else if (user) {
+                await supabase
+                    .from('cart_units')
+                    .update({
+                        is_open: false,
+                        updated_at: new Date().toISOString(),
                     })
                     .eq('active_sales_id', user.id);
             }
@@ -316,7 +387,7 @@ export default function HomeScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+            <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} translucent />
 
             <View style={styles.header}>
                 <View style={styles.headerInfo}>
@@ -456,6 +527,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: COLORS.background,
+        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight || 24 : 0,
     },
     header: {
         paddingHorizontal: 20,
