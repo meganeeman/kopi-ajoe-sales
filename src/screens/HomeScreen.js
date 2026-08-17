@@ -7,8 +7,6 @@ import {
     FlatList,
     Image,
     Modal,
-    Platform,
-    SafeAreaView,
     StatusBar,
     StyleSheet,
     Switch,
@@ -16,6 +14,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../config/supabase';
 import { PRODUCT_IMAGES } from '../constants/images';
 import { COLORS } from '../constants/theme';
@@ -24,6 +23,7 @@ import { useOtaUpdate } from '../utils/useOtaUpdate';
 
 export default function HomeScreen() {
     useOtaUpdate();
+    const insets = useSafeAreaInsets();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [cart, setCart] = useState({});
@@ -420,8 +420,8 @@ export default function HomeScreen() {
     const totalCups = getTotalCups();
 
     return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} translucent />
+        <View style={[styles.container, { paddingTop: insets.top }]}>
+            <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
             <View style={styles.header}>
                 <View style={styles.headerInfo}>
@@ -553,7 +553,7 @@ export default function HomeScreen() {
                     </View>
                 </View>
             </Modal>
-        </SafeAreaView>
+        </View>
     );
 }
 
@@ -561,7 +561,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: COLORS.background,
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight || 24 : 0,
     },
     header: {
         paddingHorizontal: 20,
