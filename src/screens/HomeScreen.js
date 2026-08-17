@@ -563,7 +563,7 @@ const styles = StyleSheet.create({
     },
     listContainer: {
         padding: 12,
-        paddingBottom: 100,
+        paddingBottom: 160,
     },
     columnWrapper: {
         justifyContent: 'space-between',
