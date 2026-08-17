@@ -7,6 +7,7 @@ import {
     FlatList,
     Image,
     Modal,
+    Platform,
     StatusBar,
     StyleSheet,
     Switch,
@@ -24,6 +25,8 @@ import { useOtaUpdate } from '../utils/useOtaUpdate';
 export default function HomeScreen() {
     useOtaUpdate();
     const insets = useSafeAreaInsets();
+    const topPadding = insets.top > 0 ? insets.top : (Platform.OS === 'android' ? (StatusBar.currentHeight || 36) : 0);
+
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [cart, setCart] = useState({});
@@ -420,7 +423,7 @@ export default function HomeScreen() {
     const totalCups = getTotalCups();
 
     return (
-        <View style={[styles.container, { paddingTop: insets.top }]}>
+        <View style={[styles.container, { paddingTop: topPadding }]}>
             <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
             <View style={styles.header}>
