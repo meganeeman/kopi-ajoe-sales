@@ -50,8 +50,6 @@ export default function LoginScreen({ navigation }) {
                     .update({ current_device_id: deviceId })
                     .eq('id', data.user.id);
             }
-
-            Alert.alert('Sukses', 'Berhasil masuk!');
         } catch (error) {
             Alert.alert('Login Gagal', error.message || 'Email atau password salah.');
         } finally {
